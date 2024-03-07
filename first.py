@@ -1,2 +1,2 @@
-pip install numpy
 
+print(555)
