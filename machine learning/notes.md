@@ -206,4 +206,6 @@ code
 - polynomial regression models：
 ![scatter](https://github.com/weinter0101/python-practice/blob/main/machine%20learning/figure/Figure4.1.jpg)
      - 當樣本數N的增加，estimation variance隨之下降，代表樣本越多可以減少模型的不確定性。
-     - 
+     - 在正常情況下，當模型複雜度越低時，所有的損失都較高，也隨著複雜度的提升而下降。
+     - 當模型過度複雜，出現overfitting時，會使的LOOCV與estimation variance飆升。
+     - **選擇模型時選擇適當複雜度的模型，特別是在training data較少時。**
