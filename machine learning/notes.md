@@ -229,3 +229,89 @@ code
      - the best models of each size for the Credit data set
      ![scatter](https://github.com/weinter0101/python-practice/blob/main/machine%20learning/figure/Figure5.1.jpg)
      **$Mallows \ C_p \ = \ \frac{SSE_p}{S^2}-(n-2p), \quad p=模型參數量$**
+- Best Model Selection: fit a model by each possible combination of the $\mathcal{p}$ predictors
+     - 總共有 $2^\mathcal{p}$ 種組合，每個變數都可以選擇要或不要。
+     - 此模型選擇方法可以找出最優模型，但在實際操作中會因計算成本和時間成本過高而難以應用，特別是 $\mathcal{p}$ 越大的時候。
+- Forward Stepwise Model Selection:
+     - 尋找最佳模型的方法
+          - step1：$\mathcal{M_0}$ denotes the null model, include intercept.
+          - step2.1：增加一個變數至模型中，$\mathcal{M_1}$，在 $\mathcal{M_0}$ 的基礎下新增一個變數，使得目前模型的 $R^2$ 最大。
+          - step2.2：增加一個變數至模型中，$\mathcal{M_2}$，在 $\mathcal{M_1}$ 的基礎下再新增一個變數，使得目前模型的 $R^2$ 最大。
+          - step2.3：增加一個變數至模型中，$\mathcal{M_3}$，添加第三個變數。
+          - step2.k：增加一個變數至模型中，$\mathcal{M_k}$，添加第k個變數。
+          - step3：從上述k個模型中可得到 $R^2$最大者
+          - step4：
+     - 優點：可有效減少數據維度，步驟明確且易於執行與解釋。
+     - 缺點：最優模型依賴於變數加入順序，可能無法找到 best model，因為一旦變數加入模型後就無法被移除。
+     - code
+     ```python
+     import numpy as np
+     import statsmodels.api as sm
+     from numpy.linalg import inv
+
+
+     #%% True model
+
+     np.random.seed(20)
+
+     N = 200
+     X = np.random.randn(N, 3)
+     X = sm.add_constant(X)
+     beta = np.array([[1, 0.5, 0.3, 0]])
+     Y = X@beta.T + np.random.randn(N, 1)
+
+     sm.OLS(Y, X).fit().summary()
+     result  = sm.OLS(Y, X).fit()
+     
+     # aic bic selection in true model
+     for kk in range(1, 5):          #kk=1, null model
+     result = sm.OLS(Y, X[:, :kk]).fit()
+     print('number of regressors=', kk, 'AIC=', result.aic)
+
+     for kk in range(1, 5):
+     result = sm.OLS(Y, X[:, :kk]).fit()
+     print('number of regressors=', kk, 'BIC=', result.bic)
+     
+     #%% OLS model
+
+     np.random.seed(20)
+     N = 500
+     k = 5
+     beta0 = np.array([[0.9,0,0.5,0,0.2]]).T
+     X = np.random.randn(N,k)
+     e = np.random.randn(N,1)
+     y = X@beta0+e
+
+     bhat = inv(X.T@X)@X.T@y
+
+     #%% forward stepwise model selection
+     
+     SST = y.T@y
+     remainingIndices = [0, 1, 2, 3, 4]
+     selectedIndices = []
+     Xk = X[:, selectedIndices]
+     AIC = np.zeros((k+1,1))
+     AIC[0,0] = y.T@y/N      # aic = SST/N + 2*0/N
+     minAIC = np.inf
+     minAIC_indices = []
+
+     for i in range(k):
+     Rsquared = np.zeros([k]) - 999      # 設定一個極小的 R squared
+     for m in remainingIndices:
+          '''把剩餘的解釋變數計算 R squared'''
+          X1 = np.concatenate((Xk, X[:, m:m+1]), axis=1)
+          bhats = inv(X1.T@X1)@X1.T@y
+          SSR = (y-X1@bhats).T @ (y-X1@bhats)
+          Rsquared[m] = (1-SSR/SST).item()
+     '''求出使 R squared 最大的 X並加入selectedIndices中'''
+     selectedIndices.append(np.argmax(Rsquared))         
+     remainingIndices.remove(selectedIndices[-1])        
+     Xk = X[:, selectedIndices]
+     AIC[i+1, 0] = (y - Xk @ inv(Xk.T@Xk) @ Xk.T@y).T@(y - Xk @ inv(Xk.T@Xk) @ Xk.T@y) / N + 2*(i+1)/N
+     print(selectedIndices)      # 得知每次選擇的 X 順序為何
+     
+     '''select the minimum AIC'''
+     if AIC[i+1, 0] < minAIC:
+          minAIC = AIC[i+1, 0]
+          minAIC_indices = selectedIndices.copy()
+     ```
