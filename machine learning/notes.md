@@ -216,3 +216,4 @@ code
 - penalize by the number of parametes 
      1. $AIC_M \ = \ L_M + \frac{2d_m}{N}$
      2. $BIC_M \ = \ L_m + \frac{log(N)}{2N}d_m$
+     3. $adjusted R^2_m$
