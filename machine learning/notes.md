@@ -265,11 +265,11 @@ code
      
      # aic bic selection in true model
      for kk in range(1, 5):          #kk=1, null model
-     result = sm.OLS(Y, X[:, :kk]).fit()
+          result = sm.OLS(Y, X[:, :kk]).fit()
      print('number of regressors=', kk, 'AIC=', result.aic)
 
      for kk in range(1, 5):
-     result = sm.OLS(Y, X[:, :kk]).fit()
+          result = sm.OLS(Y, X[:, :kk]).fit()
      print('number of regressors=', kk, 'BIC=', result.bic)
      
      #%% OLS model
@@ -296,22 +296,22 @@ code
      minAIC_indices = []
 
      for i in range(k):
-     Rsquared = np.zeros([k]) - 999      # 設定一個極小的 R squared
-     for m in remainingIndices:
+          Rsquared = np.zeros([k]) - 999      # 設定一個極小的 R squared
+          for m in remainingIndices:
           '''把剩餘的解釋變數計算 R squared'''
-          X1 = np.concatenate((Xk, X[:, m:m+1]), axis=1)
-          bhats = inv(X1.T@X1)@X1.T@y
-          SSR = (y-X1@bhats).T @ (y-X1@bhats)
-          Rsquared[m] = (1-SSR/SST).item()
-     '''求出使 R squared 最大的 X並加入selectedIndices中'''
-     selectedIndices.append(np.argmax(Rsquared))         
-     remainingIndices.remove(selectedIndices[-1])        
-     Xk = X[:, selectedIndices]
-     AIC[i+1, 0] = (y - Xk @ inv(Xk.T@Xk) @ Xk.T@y).T@(y - Xk @ inv(Xk.T@Xk) @ Xk.T@y) / N + 2*(i+1)/N
-     print(selectedIndices)      # 得知每次選擇的 X 順序為何
+               X1 = np.concatenate((Xk, X[:, m:m+1]), axis=1)
+               bhats = inv(X1.T@X1)@X1.T@y
+               SSR = (y-X1@bhats).T @ (y-X1@bhats)
+               Rsquared[m] = (1-SSR/SST).item()
+          '''求出使 R squared 最大的 X並加入selectedIndices中'''
+          selectedIndices.append(np.argmax(Rsquared))         
+          remainingIndices.remove(selectedIndices[-1])        
+          Xk = X[:, selectedIndices]
+          AIC[i+1, 0] = (y - Xk @ inv(Xk.T@Xk) @ Xk.T@y).T@(y - Xk @ inv(Xk.T@Xk) @ Xk.T@y) / N + 2*(i+1)/N
+          print(selectedIndices)      # 得知每次選擇的 X 順序為何
      
-     '''select the minimum AIC'''
-     if AIC[i+1, 0] < minAIC:
-          minAIC = AIC[i+1, 0]
-          minAIC_indices = selectedIndices.copy()
+          '''select the minimum AIC'''
+          if AIC[i+1, 0] < minAIC:
+               minAIC = AIC[i+1, 0]
+               minAIC_indices = selectedIndices.copy()
 ```
