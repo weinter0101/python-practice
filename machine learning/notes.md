@@ -51,7 +51,7 @@ plt.show()
 1. k值過小：overfitting, 無法對未見過的數據進行準確預測。
 2. k值過大：underfitting, 由於過度平滑所以對訓練數據和新數據都不能進行有效的預測。
 
-## 1. Linear Regression Model
+## 2. Linear Regression Model
 - find a linear function to fit oberseve data
 - Least Squares (LS) estimation:
      - Fitting criterion: sum of square distance between actual y and predicted y in the traning set
@@ -120,7 +120,7 @@ plt.show()
 
 
 
-## Gradient Descent
+## 3. Gradient Descent
 
 - 無法使用 Least Square Method 求解 $\beta$
      - the data is too large to compute the inverse for X'X
@@ -178,3 +178,9 @@ while delta > criterion and count < maxIters:
      - Max number of iterations
      - Min change(delta) in objective function
      - Min change(delta) in model parameters 
+
+## 4. Model Complexity Theory
+- 模型複雜度的定義
+     - model complexity = number of models in the class, |F|
+     - empirical loss: 
+     - risk:
