@@ -181,6 +181,7 @@ while delta > criterion and count < maxIters:
 
 ## 4. Model Complexity Theory
 - 模型複雜度的定義
-     - $model \quad complexity \quad = \quad number \quad of \quad models \quad in \quad the \quad class, \quad \left|F\right|$
+     - $model \ complexity \; = \quad number \quad of \quad models \quad in \quad the \quad class, \quad \left|F\right|$
      - $empirical \quad loss：L(f) = \frac{1}{N} \sum_{i} l(f, x_i, y_i)$
      - $risk：R(f) = E_{x_0, y_0} \left[l(f; x_0, y_0)\right]$
+     -  statistical learning theory(SLT) tries to bound the different between L(f) and R(f), 
