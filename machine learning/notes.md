@@ -205,3 +205,5 @@ code
      - 模型複雜度 $\left|\mathcal{F}\right|$ 小，樣本數N大，此時若empirical loss很小是可靠的，因為複雜度較低的模型減少了overfitting的風險，而大樣本提供足夠的訊息來驗證模型的效能。
 - polynomial regression models：
 ![scatter](https://github.com/weinter0101/python-practice/blob/main/machine%20learning/figure/Figure4.1.jpg)
+     - 當樣本數N的增加，estimation variance隨之下降，代表樣本越多可以減少模型的不確定性。
+     - 
