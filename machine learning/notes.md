@@ -214,5 +214,5 @@ code
 - traing error increases with $M \ = \ \left|\mathcal{F}\right|$, for model m=1, 2, ..., M, we have the corresponding empirical loss,
      $L_m = \frac{1}{N} \sum_i l(f_{m}; x_i, y_i) \quad (f_m \in \mathcal{F})$
 - penalize by the number of parametes 
-     1. $AIC_M \ = \ L_M + {2d_m}/{N}$
+     1. $AIC_M \ = \ L_M + \frac{2d_m}/{N}$
      2. $BIC_M \ = \ L_m + ((log(N))/2N)d_m$
