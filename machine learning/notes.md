@@ -219,8 +219,8 @@ code
      3. $adjusted \ R^2_m$
      **$d_m : 模型參數量$**
 - model seletion as AIC and BIC
-     - $y_i = x_{i1} \beta_1 + x_{i2} \beta_2 + x_{i3} \beta_3\\$ 
-          $beta_1 \ = \ 0.5, beta_2 \ = \ 0.3 \ and \ \beta3 \ = \ 0$
+     - $y_i = x_{i1} \beta_1 + x_{i2} \beta_2 + x_{i3} \beta_3$ 
+     - $beta_1 \ = \ 0.5, beta_2 \ = \ 0.3 \ and \ \beta3 \ = \ 0$
      - AIC choose a model including $x_{i1}, \ x_{i2}\ and \ x_{i3}$，較傾向選擇複雜的模型。
      - BIC choose a model including $x_{i1} \ and \ x_{i2}$，較傾向選擇簡潔的模型，懲罰力度更強。
 - example of The Creit Data form ISLR'
