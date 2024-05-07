@@ -246,9 +246,9 @@ code
      - code
 
 ```python
-import numpy as np
-import statsmodels.api as sm
-from numpy.linalg import inv
+     import numpy as np
+     import statsmodels.api as sm
+     from numpy.linalg import inv
 
      #%% True model
 
