@@ -115,7 +115,7 @@ for i, variable in enumerate(dependentVariable, 1):
 plt.tight_layout()
 plt.show()
 ```
-![scatter](https://github.com/weinter0101/python-practice/blob/main/machine%20learning/figure/Figure1.4.png)
+![scatter](https://github.com/weinter0101/python-practice/blob/main/machine%20learning/figure/Figure2.1.png)
 
 
 
@@ -168,6 +168,9 @@ while delta > criterion and count < maxIters:
      cost1 = cost2
      count += 1
 ```
+![scatter](https://github.com/weinter0101/python-practice/blob/main/machine%20learning/figure/Figure3.1.png)
+code
+
 - step size
      - 以 eta*gradient 的方式進行迭代，會較快求出最適解。因為當離最適解遠時，梯度會較大而步長會更大。
      - 以 eta*d 的方式進行迭代，會較慢求出最適解。因為僅依靠學習率作為更新距離，若學習率較大，可能會在最適解附近來回跳動，無法更趨近於最適解。
@@ -194,9 +197,11 @@ while delta > criterion and count < maxIters:
 - Hoeffding's inequality：
      - $P\left(\sup_{f \in \mathcal{F}} \left|R(f) - L(f)\right| \leq \varepsilon \right) > 1 - 2|\mathcal{F}| e^{-2N\varepsilon^2} = 1 - \delta$
           - $\delta \ = \ 2|\mathcal{F}| e^{-2N\varepsilon^2}$
-          - $M \ = \ dim(\mathcal{F}) \ \left|\mathcal{F}\right|$
+          - $M \ = \ dim(\mathcal{F}) \ = \ \left|\mathcal{F}\right|$
           - $\varepsilon = \sqrt{\frac{\log 2M - \log \delta}{2N}} $ 
-     - 提供一個bound，用來描述|R( f )-L( f )|小於某個概率 $\varepsilon$，涉及到模型複雜度 $\left|\mathcal{F}\right|$ 及樣本數N。
-     - training error $\varepsilon$ 會隨著模型複雜度的增加而增加。(traning error就是empirical loss的具體實現)
+     - 提供一個bound，用來描述 |R( f )-L( f )| 小於某個概率 $\varepsilon$，涉及到模型複雜度 $\left|\mathcal{F}\right|$ 及樣本數N。
+     - training error $\varepsilon$ 會隨著模型複雜度的增加而增加。( traning error就是empirical loss的具體實現 )
      - 模型複雜度 $\left|\mathcal{F}\right|$ 大，樣本數N小，此時若empirical loss很小可能只是偶然的，因為在大量的模型中進行選擇，較容易找出適合traning data的模型，但此模型面對new data時的預測能力就會比較差。
      - 模型複雜度 $\left|\mathcal{F}\right|$ 小，樣本數N大，此時若empirical loss很小是可靠的，因為複雜度較低的模型減少了overfitting的風險，而大樣本提供足夠的訊息來驗證模型的效能。
+- polynomial regression models：
+![scatter](https://github.com/weinter0101/python-practice/blob/main/machine%20learning/figure/Figure4.1.jpg)
