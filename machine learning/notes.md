@@ -183,13 +183,20 @@ while delta > criterion and count < maxIters:
 - 模型複雜度的定義
      - model complexity = number of models in the class, $\left|\mathcal{F}\right|.$
 - empirical loss and risk：
-     - empirical loss： $L(f) = \frac{1}{N} \sum_{i} l(f, x_i, y_i)$
-     - risk： $R(f) = E_{x_0, y_0} \left[l(f; x_0, y_0)\right]$
+     - empirical loss： 
+          - $L(f) = \frac{1}{N} \sum_{i} l(f, x_i, y_i)$
+          - 於訓練集中計算出來，面對已知data的預測能力。
+     - risk： 
+          - $R(f) = E_{x_0, y_0} \left[l(f; x_0, y_0)\right]$
+          - 於新的數據計算出來，面對未知data的預測能力。
+     - 當發生overfiting時，模型中的empirical loss趨近於0，但risk會非常高。
      - statistical learning theory(SLT) tries to bound the different between L( f ) and R( f ), $\forall \ f \ \in F$
 - Hoeffding's inequality：
      - $P\left(\sup_{f \in \mathcal{F}} \left|R(f) - L(f)\right| \leq \varepsilon \right) > 1 - 2|\mathcal{F}| e^{-2N\varepsilon^2} = 1 - \delta$
           - $\delta \ = \ 2|\mathcal{F}| e^{-2N\varepsilon^2}$
           - $M \ = \ dim(\mathcal{F}) \ \left|\mathcal{F}\right|$
-          - $\varepsilon = \sqrt{\frac{\log_2 2M - \log_2 \delta}{2N}} $ 
+          - $\varepsilon = \sqrt{\frac{\log 2M - \log \delta}{2N}} $ 
      - 提供一個bound，用來描述|R( f )-L( f )|小於某個概率 $\varepsilon$，涉及到模型複雜度 $\left|\mathcal{F}\right|$ 及樣本數N。
-     
+     - training error $\varepsilon$ 會隨著模型複雜度的增加而增加。(traning error就是empirical loss的具體實現)
+     - 模型複雜度 $\left|\mathcal{F}\right|$ 大，樣本數N小，此時若empirical loss很小可能只是偶然的，因為在大量的模型中進行選擇，較容易找出適合traning data的模型，但此模型面對new data時的預測能力就會比較差。
+     - 模型複雜度 $\left|\mathcal{F}\right|$ 小，樣本數N大，此時若empirical loss很小是可靠的，因為複雜度較低的模型減少了overfitting的風險，而大樣本提供足夠的訊息來驗證模型的效能。
