@@ -181,10 +181,10 @@ while delta > criterion and count < maxIters:
 
 ## 4. Model Complexity Theory
 - 模型複雜度的定義
-     - $model \ complexity \ = \ number \ of \ models \ in \ the \ class, \ \left|\mathcal{F}\right|.$
+     - model complexity = number of models in the class, $\left|\mathcal{F}\right|.$
 - empirical loss and risk：
-     - empirical loss：$L(f) = \frac{1}{N} \sum_{i} l(f, x_i, y_i)$
-     - risk：$R(f) = E_{x_0, y_0} \left[l(f; x_0, y_0)\right]$
+     - empirical loss： $L(f) = \frac{1}{N} \sum_{i} l(f, x_i, y_i)$
+     - risk： $R(f) = E_{x_0, y_0} \left[l(f; x_0, y_0)\right]$
      - statistical learning theory(SLT) tries to bound the different between L( f ) and R( f ), $\forall \ f \ \in F$
 - Hoeffding's inequality：
      - $P\left(\sup_{f \in \mathcal{F}} \left|R(f) - L(f)\right| \leq \varepsilon \right) > 1 - 2|\mathcal{F}| e^{-2N\varepsilon^2} = 1 - \delta$
@@ -192,4 +192,4 @@ while delta > criterion and count < maxIters:
           - $M \ = \ dim(\mathcal{F}) \ \left|\mathcal{F}\right|$
           - $\varepsilon = \sqrt{\frac{\log_2 2M - \log_2 \delta}{2N}} $ 
      - 提供一個bound，用來描述|R( f )-L( f )|小於某個概率 $\varepsilon$，涉及到模型複雜度 $\left|\mathcal{F}\right|$ 及樣本數N。
-  
+     
