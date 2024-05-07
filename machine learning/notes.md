@@ -244,11 +244,11 @@ code
      - 優點：可有效減少數據維度，步驟明確且易於執行與解釋。
      - 缺點：最優模型依賴於變數加入順序，可能無法找到 best model，因為一旦變數加入模型後就無法被移除。
      - code
-     ```python
-     import numpy as np
-     import statsmodels.api as sm
-     from numpy.linalg import inv
 
+```python
+import numpy as np
+import statsmodels.api as sm
+from numpy.linalg import inv
 
      #%% True model
 
@@ -314,4 +314,4 @@ code
      if AIC[i+1, 0] < minAIC:
           minAIC = AIC[i+1, 0]
           minAIC_indices = selectedIndices.copy()
-     ```
+```
