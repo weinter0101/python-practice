@@ -209,3 +209,10 @@ code
      - 在正常情況下，當模型複雜度越低時，所有的損失都較高，也隨著複雜度的提升而下降。
      - 當模型過度複雜，出現overfitting時，會使的LOOCV與estimation variance飆升。
      - **選擇模型時選擇適當複雜度的模型，特別是在training data較少時。**
+
+## 5. Penalizing Model / Complexity Model / Model Selection
+- traing error increases with $M \ = \ \left|\mathcal{F}\right|$, for model m=1, 2, ..., M, we have the corresponding empirical loss,
+     $L_m = \frac{1}{N} \sum_i l(f_{m}; x_i, y_i) \quad (f_m \in \mathcal{F})$
+- penalize by the number of parametes 
+     1. $AIC_M \ = \ L_M + (2d_m)/N$
+     2. $BIC_M \ = \ L_m + ((log(N))/2N)d_m$
