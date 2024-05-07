@@ -1,0 +1,180 @@
+# Marchine Learning
+
+## 1. k-NN regression
+
+```python
+import numpy as np
+import matplotlib.pyplot as plt
+
+# create data
+np.random.seed(20)
+x = np.random.uniform(0, 10, 18)
+y = np.random.uniform(0, 10, 18)
+
+# create scatter plot
+plt.figure(figsize=(8, 6))
+plt.scatter(x, y, c='blue', label='$Random\; Points$')
+plt.title('$Scatter\; Plot\; with\; 18\; Random\; Points$')
+plt.xlabel('$X$')
+plt.ylabel('$Y$')
+plt.legend()
+plt.show()
+```
+![scatter](https://github.com/weinter0101/python-practice/blob/main/machine%20learning/figure/Figure1.1.png)
+
+
+### k=n
+- k=1
+```python
+k = 1
+knnRegressor = KNeighborsRegressor(k)
+knnRegressor.fit(x, y)
+
+T = np.linspace(0, 10, 500)[:, np.newaxis] 
+knnLine = knnRegressor.predict(T)
+
+plt.figure(figsize=(10, 6))
+plt.scatter(x, y, color='blue', label='$Data\; Points$')
+plt.plot(T, knnLine, color='red', label=f'$k={k}\; Regression$')
+plt.title('$k-NN\; Regression\; with\; k=3$')
+plt.xlabel('$X$')
+plt.ylabel('$Y$')
+plt.legend()
+plt.show()
+```
+![scatter](https://github.com/weinter0101/python-practice/blob/main/machine%20learning/figure/Figure1.2.png)
+
+- k=2, 3, 5, 18
+     [code](https://gist.github.com/7e0deab4e3c6ca9323e3c195fc77b71f.git)
+![scatter](https://github.com/weinter0101/python-practice/blob/main/machine%20learning/figure/Figure1.3.png)
+
+1. k值過小：overfitting, 無法對未見過的數據進行準確預測。
+2. k值過大：underfitting, 由於過度平滑所以對訓練數據和新數據都不能進行有效的預測。
+
+## 1. Linear Regression Model
+- find a linear function to fit oberseve data
+- Least Squares (LS) estimation:
+     - Fitting criterion: sum of square distance between actual y and predicted y in the traning set
+     - Find a function that minimizes this critersoin.
+- general form of linear function:
+
+$$
+\begin{align*}
+\mathbf{f}(\mathbf{x}; \boldsymbol{\beta}) &= \beta_0 + \beta_1 x_1 + \beta_2 x_2 + \ldots + \beta_k x_k \quad (x_0 = 1) \\
+&= \sum_{j=0}^{k} \beta_j x_j \\
+&= \mathbf{x}^{\top} \boldsymbol{\beta},
+\end{align*}
+$$
+
+
+
+- define a loss function(fitting criterion):
+
+$$
+square \quad loss: \( l(y, \hat{y}) = (y - \hat{y})^2 \)
+$$
+
+- example: advertising data
+```python
+import pandas as pd
+import os
+import matplotlib.pyplot as plt
+import statsmodels.formula.api as smf #OLS
+import seaborn as sns
+
+path = r'C:\Users\chewei\Documents\python-practice\machine learning\data'
+name = 'Advertising.csv'
+
+advertising = pd.read_csv(os.path.join(path, name))
+advertising.info()
+advertising.head(3)
+
+dependentVariable = ['TV', 'radio', 'newspaper']
+
+for variables in dependentVariable:
+    est = smf.ols(f"sales ~ {variables}", advertising).fit()
+    print(est.summary())
+    
+est = smf.ols('sales ~ TV + radio + newspaper', advertising).fit()
+print(est.summary())
+print(advertising.corr())
+
+est = smf.ols('sales ~ TV + radio + TV * radio', advertising).fit()
+print(est.summary())
+
+#%% figure
+plt.figure(figsize=(18, 6))
+
+for i, variable in enumerate(dependentVariable, 1):
+    plt.subplot(1, 3, i) 
+    sns.regplot(x=variable, y='sales', data=advertising)
+    plt.title(f'Sales to {variable}')
+    plt.xlabel(variable)
+    plt.ylabel('Sales')
+
+plt.tight_layout()
+plt.show()
+```
+![scatter](https://github.com/weinter0101/python-practice/blob/main/machine%20learning/figure/Figure1.4.png)
+
+
+
+
+## Gradient Descent
+
+- 無法使用 Least Square Method 求解 $\beta$
+     - the data is too large to compute the inverse for X'X
+     - the colsed form solution is not exist
+- $\beta^{(1)} = \beta^{(0)} + \eta d$
+     - $\beta^{(0)} \text{ is the initial guess.}$
+     - $\beta^{(1)} \text{ is a guess after the first correction.}$
+     - $\eta \text{ is the learning rate.}$
+     - d is the descent direction.
+          - gradient descent: find maximun, d=-1
+          - gradient ascent: find minimun, d=1
+- $L(\beta^{(0)} + \eta d) = L(\beta^{(0)}) + \eta \nabla L(\beta^{(0)})^\mathrm{T} d + R$
+```python
+import numpy as np
+from numpy.linalg import inv
+
+# create data
+np.random.seed(20)
+N = 100     # sample size
+k = 5        
+beta = np.array([[0.9, 0.5, 0.2, -0.2, -0.7]]).T       # true beta
+X = np.random.randn(N, k)
+e = np.random.randn(N,1)
+y = X@beta+e
+
+# OLS
+bhat1 = inv(X.T@X)@X.T@y
+
+# gradient descent
+bhat2 = np.zeros([k, 1])
+cost1 = (y-X@bhat2).T @ (y-X@bhat2) / N
+eta = 0.05
+criterion = 0.0000001   # 停止條件  e.g. (bhat-b)/b
+maxIters = 500      # 最多尋找次數
+count = 0
+delta = 999
+
+while delta > criterion and count < maxIters:
+     gradient = -X.T @ (y-X@bhat2) / N    # form
+   # d = (g>0)*-1 + (g<0)*1   # 將梯度轉換成 1 或 -1 的方向
+     bhat2 = bhat2 - eta*gradient
+   # bhat2 = bhat2 + eta*d    # 以方向去迭代初 bhat2
+     cost2 = (y-X@bhat2).T @ (y-X@bhat2) / N
+     delta = abs((cost2-cost1) / cost1)
+     cost1 = cost2
+     count += 1
+```
+- step size
+     - 以 eta*gradient 的方式進行迭代，會較快求出最適解。因為當離最適解遠時，梯度會較大而步長會更大。
+     - 以 eta*d 的方式進行迭代，會較慢求出最適解。因為僅依靠學習率作為更新距離，若學習率較大，可能會在最適解附近來回跳動，無法更趨近於最適解。
+
+- tweak learning rate
+     - eta設定過大，會造成無法收斂；eta設定過小，會造成收斂過慢。
+- common criteria
+     - Max number of iterations
+     - Min change(delta) in objective function
+     - Min change(delta) in model parameters 
