@@ -181,6 +181,6 @@ while delta > criterion and count < maxIters:
 
 ## 4. Model Complexity Theory
 - 模型複雜度的定義
-     - model complexity = number of models in the class, |F|
-     - empirical loss: 
-     - risk:
+     - model complexity = number of models in the class, $$\left| F \right|$$
+     - empirical loss：
+     - risk：
