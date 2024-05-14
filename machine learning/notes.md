@@ -235,10 +235,10 @@ code
 - Forward Stepwise Model Selection:
      - 尋找最佳模型的方法
           - step1：$\mathcal{M_0}$ denotes the null model, include intercept.
-          - step2.1：增加一個變數至模型中， $\mathcal{M_1}$ ，在 $\mathcal{M_0}$ 的基礎下新增一個變數，使得目前模型的 $R^2$ 最大。
-          - step2.2：增加一個變數至模型中，$\mathcal{M_2}$，在 $\mathcal{M_1}$ 的基礎下再新增一個變數，使得目前模型的 $R^2$ 最大。
-          - step2.3：增加一個變數至模型中，$\mathcal{M_3}$，添加第三個變數。
-          - step2.k：增加一個變數至模型中，$\mathcal{M_k}$，添加第k個變數。
+          - step2.1：增加一個變數至模型中， $\mathcal{M_1}$ 在 $\mathcal{M_0}$ 的基礎下新增一個變數，使得目前模型的 $R^2$ 最大。
+          - step2.2：增加一個變數至模型中，$\mathcal{M_2}$ 在 $\mathcal{M_1}$ 的基礎下再新增一個變數，使得目前模型的 $R^2$ 最大。
+          - step2.3：增加一個變數至模型中，$\mathcal{M_3}$ 添加第三個變數。
+          - step2.k：增加一個變數至模型中，$\mathcal{M_k}$ 添加第k個變數。
           - step3：從上述k個模型中可得到 $R^2$最大者
           - step4：
      - 優點：可有效減少數據維度，步驟明確且易於執行與解釋。
