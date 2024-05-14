@@ -235,7 +235,7 @@ code
 - Forward Stepwise Model Selection:
      - 尋找最佳模型的方法
           - step1：$\mathcal{M_0}$ denotes the null model, include intercept.
-          - step2.1：增加一個變數至模型中，$\mathcal{M_1}$，在 $\mathcal{M_0}$ 的基礎下新增一個變數，使得目前模型的 $R^2$ 最大。
+          - step2.1：增加一個變數至模型中， $\mathcal{M_1}$ ，在 $\mathcal{M_0}$ 的基礎下新增一個變數，使得目前模型的 $R^2$ 最大。
           - step2.2：增加一個變數至模型中，$\mathcal{M_2}$，在 $\mathcal{M_1}$ 的基礎下再新增一個變數，使得目前模型的 $R^2$ 最大。
           - step2.3：增加一個變數至模型中，$\mathcal{M_3}$，添加第三個變數。
           - step2.k：增加一個變數至模型中，$\mathcal{M_k}$，添加第k個變數。
@@ -251,9 +251,7 @@ code
      from numpy.linalg import inv
 
      #%% True model
-
      np.random.seed(20)
-
      N = 200
      X = np.random.randn(N, 3)
      X = sm.add_constant(X)
@@ -273,7 +271,6 @@ code
      print('number of regressors=', kk, 'BIC=', result.bic)
      
      #%% OLS model
-
      np.random.seed(20)
      N = 500
      k = 5
@@ -281,11 +278,9 @@ code
      X = np.random.randn(N,k)
      e = np.random.randn(N,1)
      y = X@beta0+e
-
      bhat = inv(X.T@X)@X.T@y
 
      #%% forward stepwise model selection
-     
      SST = y.T@y
      remainingIndices = [0, 1, 2, 3, 4]
      selectedIndices = []
