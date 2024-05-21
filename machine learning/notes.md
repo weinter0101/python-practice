@@ -70,9 +70,7 @@ $$
 
 - define a loss function(fitting criterion):
 
-$$
-square \quad loss: \( l(y, \hat{y}) = (y - \hat{y})^2 \)
-$$
+     $square \ loss: ( l(y, \hat{y}) = (y - \hat{y})^2)$
 
 - example: advertising data
 ```python
@@ -210,24 +208,26 @@ code
      - 當模型過度複雜，出現overfitting時，會使的LOOCV與estimation variance飆升。
      - **選擇模型時選擇適當複雜度的模型，特別是在training data較少時。**
 
-## 5. Penalizing Model / Complexity Model / Model Selection
+## 5. Penalizing Model Complexity - Model Selection
 - traing error increases with $M \ = \ \left|\mathcal{F}\right|$, for model m=1, 2, ..., M, we have the corresponding empirical loss,
      $L_m = \frac{1}{N} \sum_i l(f_{m}; x_i, y_i) \quad (f_m \in \mathcal{F})$
 - penalize by the number of parametes 
      1. $AIC_M \ = \ L_M + \frac{2d_m}{N}$
      2. $BIC_M \ = \ L_m + \frac{log(N)}{2N}d_m$
      3. $adjusted \ R^2_m$
-     **$d_m : 模型參數量$**
+
+          **$d_m : 模型參數量$**
 - model seletion as AIC and BIC
-     - $Treu \ model：y_i = x_{i1} \beta_1 + x_{i2} \beta_2 + x_{i3} \beta_3$ 
+     - $True \ model：y_i = x_{i1} \beta_1 + x_{i2} \beta_2 + x_{i3} \beta_3$ 
           - $beta_1 \ = \ 0.5, beta_2 \ = \ 0.3 \ and \ \beta3 \ = \ 0$
      - AIC choose a model including $x_{i1}, \ x_{i2}\ and \ x_{i3}$，較傾向選擇複雜的模型。
      - BIC choose a model including $x_{i1} \ and \ x_{i2}$，較傾向選擇簡潔的模型，懲罰力度更強。
-- example of The Creit Data form ISLR'
+- example of The Creit Data form ISLR：
      - predictors of the credit data set:
           Income, Limit, Rating, Card, Age, Education, Gender, Student, Married, Ethnicity, Balace
      - the best models of each size for the Credit data set
      ![scatter](https://github.com/weinter0101/python-practice/blob/main/machine%20learning/figure/Figure5.1.jpg)
+
      **$Mallows \ C_p \ = \ \frac{SSE_p}{S^2}-(n-2p), \quad p=模型參數量$**
 - Best Model Selection: fit a model by each possible combination of the $\mathcal{p}$ predictors
      - 總共有 $2^\mathcal{p}$ 種組合，每個變數都可以選擇要或不要。
@@ -235,12 +235,12 @@ code
 - Forward Stepwise Model Selection:
      - 尋找最佳模型的方法
           - step1：$\mathcal{M_0}$ denotes the null model, include intercept.
-          - step2.1：增加一個變數至模型中， $\mathcal{M_1}$ 在 $\mathcal{M_0}$ 的基礎下新增一個變數，使得目前模型的 $R^2$ 最大。
+          - step2.1：增加一個變數至模型中，$\mathcal{M_1}$ 在 $\mathcal{M_0}$ 的基礎下新增一個變數，使得目前模型的 $R^2$ 最大。
           - step2.2：增加一個變數至模型中，$\mathcal{M_2}$ 在 $\mathcal{M_1}$ 的基礎下再新增一個變數，使得目前模型的 $R^2$ 最大。
           - step2.3：增加一個變數至模型中，$\mathcal{M_3}$ 添加第三個變數。
-          - step2.k：增加一個變數至模型中，$\mathcal{M_k}$ 添加第k個變數。
+          - step2.k：增加一個變數至模型中，$\mathcal{M_k}$ ，直到所有變數皆加入。
           - step3：從上述k個模型中可得到 $R^2$最大者
-          - step4：
+          - step4：select a best model from $\mathcal{M_0}, \ \mathcal{M_1},..., \ \mathcal{M_p}$ using CV, AIC, BIC or adjusted $R^2$
      - 優點：可有效減少數據維度，步驟明確且易於執行與解釋。
      - 缺點：最優模型依賴於變數加入順序，可能無法找到 best model，因為一旦變數加入模型後就無法被移除。
      - code
@@ -310,3 +310,89 @@ code
                minAIC = AIC[i+1, 0]
                minAIC_indices = selectedIndices.copy()
 ```
+
+- Backward Stepwise Model Selection：
+     - 尋找最佳模型的方法與 Forward Stepwide 類似，Backward Stepwise 是從 full model 開始，慢慢刪掉變數，使得目前模型的 $R^2$ 最大。
+     
+- compared with 'cross validation', 'best model selection', 'forward stepwise model selection' and 'backward stepwise model selection'
+     1. cross validation(CV)所需計算 $2^p*n$ 次；best model selection所需計算 $2^p$ 次；forward stepwise model selection所需計算 $1+\frac{p(p+1)}{2}$ 次  
+     相比於CV，這些方法皆大大減少計算量，提生效率。
+     2. 當 p 非常大時，best model selection 則無法獲得最適解，因為模型的計算量會指數增長。
+     3. 如果 p>n 時，best model selection 及 backward stepwise model selection 皆無法獲得最適解，因為 $(X^TX)^{-1}$ 不存在。
+          
+
+## 6. Penalizing Model Complexity - Regularization
+- regularization
+     - 目的：正規化本身不是直接懲罰參數 $\beta_j$，而是懲罰參數本身的編碼位元數，這是一種將模型複雜度與數據相符程度之間的量化方法。
+     - 參數限制：如果參數 $\beta_j$ 沒有受到限制，可能會使得模型發生overfitting的問題。
+     - penalized SSR(f) with the size of $\beta$ (SSR, sum of squared residuals)
+          - $\beta \ = \ \arg \min SSR(f)$
+          - $\tilde\beta \ = \ \arg \min SSR(f) \ + \ penalty(\beta)$
+     - shrinkage methods：透過對參數的絕對大小施加懲罰來防止參數值過大，從而限制模型的自由度。這些方法能有效減少參數的高變異性問題，並增強模型對新數據的預測能力。  
+     如：ridge regression和Lasso regression
+- Ridge Regression ($L_2$ norm)
+     - $\tilde{\beta}_{\text{ridge}} = \arg \underset{\beta}{\min} \{ SSR(f) + \lambda \|\beta\|^2 \}$
+     - closed form soluation：
+          $\tilde{\beta}_{\text{ridge}} = (\lambda I + X^T X)^{-1} X^T y$
+     - regularization parameter(tuning parameter)： $\lambda$
+          - $\lambda$ 可以控制對係數懲罰的強度，$\lambda$ 越大，對係數的懲罰越大，則係數越趨近於0。
+          - 當 $\lambda=0$ 時，ridge regression 變回 OLS regression
+          - $\lambda$ 的選擇通常通過交叉驗證在偏差和變異之間取得平衡，進而選擇最佳的 $\lambda$ 值。
+     - feature normalization：
+          $\tilde{x}_{ik} = \frac{x_{ik} - N^{-1} \sum_{j=1}^N x_{jk}}{\hat{\sigma}_{x_k}}$
+
+- Lasso Regression ($L_1$ norm)
+     - least absolute shrinkage and selection operator regression
+     - $\tilde{\beta}_{\text{lasso}} = \arg \underset{\beta}{\min}\{ SSR(f) + \lambda \|\beta\| \}$
+     - no closed form soluation
+     - regularization parameter(tuning parameter)： $\lambda$
+          - $\lambda$ 可以控制對係數懲罰的強度，$\lambda$ 越大，對係數的懲罰越大，可將係數壓縮至0。
+          - $\lambda$ 的選擇通常通過交叉驗證在偏差和變異之間取得平衡，進而選擇最佳的 $\lambda$ 值。
+     - 共線性問題：  
+          - 當變數高度相關時，可以透過lasso regression ($\lambda \rightarrow \infty$) 完全排出一些變數，來解決共線性問題。
+     - 應用限制：
+          - 當有一組高度相關且都很重要的變數時，lasso regression只會從中選擇一個變數。
+          - 當p>>>n時，lasso regression的表現會比較不好，因為最多只能選擇n個變數進入模型。
+
+- optimize problem as ridge and lasso
+     - ridge regression：  
+     $\underset{\beta}{\min} \ \sum_{i=1}^N (y_i - X_i^T \beta)^2 + \lambda \sum_{j=1}^p \beta_j^2 \\$
+     $\Rightarrow \ \underset{\beta}{\min} \sum_{i=1}^N (y_i - X_i^T \beta)^2 \quad \text{s.t.} \ \sum_{j=1}^p \beta_j^2 \leq t$
+     - lasso regression：  
+     $\underset{\beta}{\min} \ \sum_{i=1}^N (y_i - X_i^T \beta)^2 + \lambda \sum_{j=1}^p |\beta_j|  \\$
+     $\Rightarrow \ \underset{\beta}{\min} \sum_{i=1}^N (y_i - X_i^T \beta)^2 \quad \text{s.t.} \ \sum_{j=1}^p |\beta_j| \leq t$
+
+- standardized ridge/lasso regression coefficients on Credit dataset
+![scatter](https://github.com/weinter0101/python-practice/blob/main/machine%20learning/figure/Figure6.1.jpg)
+![scatter](https://github.com/weinter0101/python-practice/blob/main/machine%20learning/figure/Figure6.2.jpg)
+
+a
+
+a
+
+a
+
+a
+
+a
+
+a
+a
+
+a
+
+a
+
+a
+
+a
+
+a
+
+a
+
+a
+a
+
+
+
