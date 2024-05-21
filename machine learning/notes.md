@@ -363,9 +363,11 @@ code
      $\Rightarrow \ \underset{\beta}{\min} \sum_{i=1}^N (y_i - X_i^T \beta)^2 \quad \text{s.t.} \ \sum_{j=1}^p |\beta_j| \leq t$
 
 - standardized ridge/lasso regression coefficients on Credit dataset
-![scatter](https://github.com/weinter0101/python-practice/blob/main/machine%20learning/figure/Figure6.1.jpg)
-![scatter](https://github.com/weinter0101/python-practice/blob/main/machine%20learning/figure/Figure6.2.jpg)
-
+     - ridge regression cofficients
+          ![scatter](https://github.com/weinter0101/python-practice/blob/main/machine%20learning/figure/Figure6.1.jpg)
+     - lasso regression cofficients
+          ![scatter](https://github.com/weinter0101/python-practice/blob/main/machine%20learning/figure/Figure6.2.jpg)
+     
 a
 
 a
