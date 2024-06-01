@@ -42,6 +42,7 @@ y = X@beta0+e
 bhat = inv(X.T@X)@X.T@y
 
 
+
 # model selection
 # forward stepwise model selection
 SST = y.T@y
