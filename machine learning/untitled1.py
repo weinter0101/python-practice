@@ -1,78 +1,164 @@
 # -*- coding: utf-8 -*-
 """
-Created on Wed Apr 10 15:33:53 2024
+Created on Sun Jun  2 13:28:06 2024
 
 @author: chewei
 """
 
+
+import pandas as pd
 import numpy as np
+import seaborn as sns
 import matplotlib.pyplot as plt
+import statsmodels.api as sm
+
+from sklearn.feature_selection import SelectKBest, f_classif
+from sklearn.preprocessing import MinMaxScaler, StandardScaler
+from sklearn.preprocessing import LabelEncoder
+from sklearn.model_selection import train_test_split
 from numpy.linalg import inv
-np.random.seed(20)
-N = 100
-k = 5
-beta0 = np.array([[0.9,0,0.5,0,0.2]]).T
-X = np.random.randn(N,k)
-e = np.random.randn(N,1)
-y = X@beta0+e
+from sklearn.linear_model import Lasso, Ridge
+from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
+from sklearn.model_selection import cross_val_score, GridSearchCV, RandomizedSearchCV, StratifiedKFold
+from sklearn.linear_model import LogisticRegression
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.ensemble import GradientBoostingClassifier, RandomForestClassifier, VotingClassifier, BaggingClassifier, AdaBoostClassifier
+from sklearn.svm import SVC
+from sklearn.neural_network import MLPClassifier
+from xgboost import XGBClassifier
+from lightgbm import LGBMClassifier
+from sklearn.cluster import AgglomerativeClustering
+from sklearn.pipeline import Pipeline
+#%% modelx
 
-bhat = inv(X.T@X)@X.T@y
+models = {
+    'Logistic Regression': LogisticRegression(),
+    'Decision Tree': DecisionTreeClassifier(),
+    'Random Forest': RandomForestClassifier(n_estimators=100),
+    'SVM': SVC(),
+    'Gradient Boosting': GradientBoostingClassifier(n_estimators=100),
+    'Neural Network': MLPClassifier(hidden_layer_sizes=(100,)),
+    'Voting Classifier': VotingClassifier(
+        estimators=[('lr', LogisticRegression()), ('rf', RandomForestClassifier()), ('svm', SVC())],
+        voting='hard'
+    ),
+    'Bagging Classifier': BaggingClassifier(
+        estimator=DecisionTreeClassifier(),
+        n_estimators=100
+    ),
 
-# model selection
-#%% forward stepwise model selectino
+    'XGBoost Classifier': XGBClassifier(
+        n_estimators=100
+    ),
+    'LightGBM': LGBMClassifier(n_estimators=100),
+}
 
-SST = y.T@y
-list_ = [0, 1, 2, 3, 4]     # 尚未被選擇的變數
-idk = []        # 已被選擇的變數
-Xk = X[:, idk]
-AIC = np.zeros((k+1,1))
-AIC[0,0] = y.T@y/N
+param_grid = {
+    'Logistic Regression': {
+        'C': [0.1, 1, 10],
+        'penalty': ['l1', 'l2']
+    },
+    'Decision Tree': {
+        'max_depth': [None, 5, 10],
+        'min_samples_split': [2, 5, 10]
+    },
+    'Random Forest': {
+        'n_estimators': [50, 100, 200],
+        'max_depth': [None, 10, 20],
+        'min_samples_split': [2, 5, 10]
+    },
+    'SVM': {
+        'C': [0.1, 1, 10],
+        'kernel': ['linear', 'rbf']
+    },
+    'Gradient Boosting': {
+        'n_estimators': [50, 100, 200],
+        'learning_rate': [0.01, 0.1, 1],
+        'max_depth': [3, 5, 7]
+    },
+    'Neural Network': {
+        'hidden_layer_sizes': [(50,), (100,), (50, 50)],
+        'alpha': [0.0001, 0.001, 0.01]
+    },
+    'Voting Classifier': {},
+    'Bagging Classifier': {
+        'n_estimators': [10, 50, 100],
+        'max_samples': [0.5, 0.7, 1.0]
+    },
+    'XGBoost Classifier': {
+        'n_estimators': [50, 100, 200],
+        'learning_rate': [0.01, 0.1, 1],
+        'max_depth': [3, 5, 7]
+    },
+    'LightGBM': {
+        'n_estimators': [50, 100, 200],
+        'learning_rate': [0.01, 0.1, 1],
+        'max_depth': [3, 5, 7]
+    }
+}
 
-for ii in range(k):
-    R2 = np.zeros([k]) - 999
-    print(idk)
-    for m in list_:
-        X1 = np.concatenate((Xk,X[:,m:m+1]),axis=1)
-        bhats = inv(X1.T@X1)@X1.T@y
-        SSR = (y-X1@bhats).T@(y-X1@bhats)
-        R2[m]=(1-SSR/SST).item()
-    idk.append(np.argmax(R2)) # index for keeping
-    list_.remove(idk[-1]) # index for searching
-    Xk = X[:,idk] # selected regressor(s)
-    AIC[ii+1,0] = (y-Xk@inv(Xk.T@Xk)@Xk.T@y).T@(y-Xk@inv(Xk.T@Xk)@Xk.T@y)/N+2*(ii+1)/N
-    
+#%%
+def train_and_evaluate_models(X_train, X_test, y_train, y_test, models, seed):
+    results = []
 
-#%% ridge regression
-N_grid = 50
-beta_ridge = np.zeros((N_grid,k))
-lam = np.linspace(0, 5, num=N_grid)
-CV1=np.zeros((N,N_grid))
+    for model_name, model in models.items():
+        if hasattr(model, 'random_state'):
+            model.set_params(random_state=seed)
+        model.fit(X_train, y_train)
+        y_pred = model.predict(X_test)
+        
+        accuracy = round(accuracy_score(y_test, y_pred) * 100, 4)
+        precision = round(precision_score(y_test, y_pred) * 100, 4)
+        recall = round(recall_score(y_test, y_pred) * 100, 4)
+        f1 = round(f1_score(y_test, y_pred) * 100, 4)
+        
+        cv_scores = cross_val_score(model, X_train, y_train, cv=5, scoring='accuracy')
+        mean_cv_score = cv_scores.mean()
+        
+        results.append([model_name, accuracy, precision, recall, f1, mean_cv_score])
 
+    df_results = pd.DataFrame(results, columns=['Model', 'Accuracy', 'Precision', 'Recall', 'F1-score', 'Mean CV Score'])
+    return df_results
+
+df_model_results = train_and_evaluate_models(x_train, x_test, y_train, y_test, models, random_state)
+
+print(df_model_results)
 
 
 #%%
-   
-# LOOCV
-for ii in np.arange(N):
-    idx1=(X[:,0]!=X[ii,0]).flatten()
-    idx2=(X[:,0]==X[ii,0]).flatten()
-    X1=X[idx1,:]
-    y1=y[idx1,:]
-    for jj in range(N_grid):
-        beta_ridge = inv(lam[jj]*np.eye(k)+X1.T@X1)@X1.T@y1
-        CV1[ii,jj]=(y[idx2,:]-X[idx2,:]@beta_ridge)**2
-CVm=CV1.mean(axis=0)
-lam_o = lam[np.argmin(CVm)]
-beta_ridge_cv = inv(lam_o*np.eye(k)+X.T@X)@X.T@y
 
-from sklearn import linear_model
-ridge_reg = linear_model.Ridge(alpha=lam_o, fit_intercept=False)
-ridge_reg.fit(X, y)
-print(ridge_reg.coef_)
+def train_and_evaluate_models_with_gridsearch(X_train, X_test, y_train, y_test, models, param_grid, seed):
+    results = []
 
-lasso_reg = linear_model.Lasso(alpha=0.3, fit_intercept=False)
-lasso_reg.fit(X, y)
-print(lasso_reg.coef_)
+    for model_name, model in models.items():
+        print(f"Training {model_name}...")
+        if model_name in param_grid:
+            grid_search = GridSearchCV(estimator=model, param_grid=param_grid[model_name], cv=5, scoring='accuracy', n_jobs=-1)
+            grid_search.fit(X_train, y_train)
+            best_model = grid_search.best_estimator_
+            best_params = grid_search.best_params_
+        else:
+            if hasattr(model, 'random_state'):
+                model.set_params(random_state=seed)
+            best_model = model
+            best_model.fit(X_train, y_train)
+            best_params = {}
 
-lasso2_reg = linear_model.LassoCV(alphas=np.linspace(0, 5, 100),cv=3, fit_intercept=False).fit(X, y)
-print(lasso2_reg.coef_)
+        y_pred = best_model.predict(X_test)
+        
+        accuracy = round(accuracy_score(y_test, y_pred) * 100, 4)
+        precision = round(precision_score(y_test, y_pred) * 100, 4)
+        recall = round(recall_score(y_test, y_pred) * 100, 4)
+        f1 = round(f1_score(y_test, y_pred) * 100, 4)
+        
+        cv_scores = cross_val_score(best_model, X_train, y_train, cv=5, scoring='accuracy')
+        mean_cv_score = cv_scores.mean()
+        
+        results.append([model_name, accuracy, precision, recall, f1, mean_cv_score, best_params])
+
+    df_results = pd.DataFrame(results, columns=['Model', 'Accuracy', 'Precision', 'Recall', 'F1-score', 'Mean CV Score', 'Best Parameters'])
+    return df_results
+
+# 使用示例
+df_model_results = train_and_evaluate_models_with_gridsearch(x_train, x_test, y_train, y_test, models, param_grid, random_state)
+print(df_model_results)
