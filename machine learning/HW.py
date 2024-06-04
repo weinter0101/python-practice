@@ -108,12 +108,12 @@ Standard_data(data_test, 'standardization')
 #     y_train = data_train['not.fully.paid']
 #     y_test = data_test['not.fully.paid']
 #     return data_train, data_test, x_train, x_test, y_train, y_test    
+# 
 # =============================================================================
-
 # 平衡 train data 中的 0 1
 data_train0 = data_train[data_train['not.fully.paid'] == 0]
 data_train1 = data_train[data_train['not.fully.paid'] == 1]
-data_train0 = data_train0.sample(1483, random_state=415)
+data_train0 = data_train0.sample(1483, random_state=1020)
 
 data_train = pd.concat([data_train0, data_train1], ignore_index=True)
 
@@ -464,7 +464,6 @@ param_gridd = {
 
 }
 
-random_state = 1117
 
 def tune_hyperparameters(X_train, X_test, y_train, y_test, models, param_grid, seed):
     results = []

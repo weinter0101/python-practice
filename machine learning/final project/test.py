@@ -29,7 +29,7 @@ from lightgbm import LGBMClassifier
 from sklearn.cluster import AgglomerativeClustering
 from sklearn.pipeline import Pipeline
 
-#%% 資料前處理
+
 data = pd.read_csv(r"C:\Users\chewei\Documents\python-practice\machine learning\final project\loan.csv")
 random_state = 1117
 
@@ -40,6 +40,11 @@ def Purpose_transformation(data, method):
         data['purpose'] = label_encoder.fit_transform(data['purpose'])
     elif method in ['dummy', 'one_hot']:
         data = pd.get_dummies(data=data, columns=['purpose'], drop_first=True)
+        data[['purpose_credit_card', 'purpose_debt_consolidation', 'purpose_educational', 'purpose_home_improvement', 'purpose_major_purchase', 
+              'purpose_small_business']] = data[['purpose_credit_card', 'purpose_debt_consolidation', 'purpose_educational', 'purpose_home_improvement', 'purpose_major_purchase', 'purpose_small_business']].astype(int)
+        order = ['credit.policy', 'int.rate', 'installment', 'log.annual.inc', 'dti', 'fico', 'days.with.cr.line', 'revol.bal', 'revol.util', 'inq.last.6mths', 'delinq.2yrs', 'pub.rec', 
+                 'purpose_credit_card', 'purpose_debt_consolidation', 'purpose_educational', 'purpose_home_improvement', 'purpose_major_purchase', 'purpose_small_business', 'not.fully.paid']
+        data = data[order]
     else:    
         raise ValueError("Method must be either 'label' or 'one_hot'")
     return data
@@ -96,14 +101,13 @@ IQRVars = ['installment', 'days.with.cr.line', 'revol.bal']
 logVars = ['int.rate', 'installment', 'dti', 'fico', 'days.with.cr.line', 'revol.bal', 'revol.util']
 stdVars = ['int.rate', 'installment', 'log.annual.inc', 'dti', 'fico', 'days.with.cr.line', 'revol.bal', 'revol.util']
 
-data = Purpose_transformation(data, 'label')
+data = Purpose_transformation(data, 'dummy')
 data = Outlier_IQR(data, IQRVars)
-data = Netural_log(data, IQRVars)
-data = Standard_data(data, stdVars, 'standardization')
+data = Netural_log(data, logVars)
+data = Standard_data(data, stdVars, 'min-max scaling')
 data_train, data_test, x_train, x_test, y_train, y_test = split_data(data, 0.7, random_state)
 
 
-#%% feature 篩選
 def forward_stepwise_selection(data):
     '''使用 forward stepwise 進行變數篩選'''
     x = data.drop('not.fully.paid', axis=1)
@@ -170,10 +174,9 @@ def SelectKBest_selection(x_train, y_train, k):
 selectedFeatures_forward = forward_stepwise_selection(data_train)
 selectedFeatures_lasso = lasso_selection(x_train, y_train, alpha=0.01)
 selectedFeatures_ridge = ridge_selection(x_train, y_train, alpha=0.01)
-selectedFeautres_kbest = SelectKBest_selection(x_train, y_train, k=10)
+selectedFeautres_kbest = SelectKBest_selection(x_train, y_train, k=12)
 
 
-#%% 選擇 feature
 def data_features(x_train, x_test, method):
     if method == 'forward':        
         xTrain = x_train[selectedFeatures_forward]
@@ -194,20 +197,17 @@ def data_features(x_train, x_test, method):
 x_train, x_test = data_features(x_train, x_test, method = 'ridge')
 
 
-#%% fit 5050
-
 test = pd.read_csv(r"C:\Users\chewei\Desktop\ya.csv")
 
-test = Purpose_transformation(test, 'label')
+test = Purpose_transformation(test, 'dummy')
 test = Outlier_IQR(test, IQRVars)
-test = Netural_log(test, IQRVars)
-test = Standard_data(test, stdVars, 'standardization')
+test = Netural_log(test, logVars)
+test = Standard_data(test, stdVars, 'min-max scaling')
 
 x_test = test.drop('not.fully.paid', axis=1)
 y_test = test['not.fully.paid']
-x_train, x_test = data_features(x_train, x_test, method = 'ridge')
+x_train, x_test = data_features(x_train, x_test, method = 'ridge')  
 
-#%% modelx
 
 models = {
     'Logistic Regression': LogisticRegression(),
@@ -231,11 +231,11 @@ models = {
     'LightGBM': LGBMClassifier(n_estimators=100),
 }
 
-#%%
 param_grid = {
     'Logistic Regression': {
         'C': [0.1, 1, 10],
-        'penalty': ['l1', 'l2']
+        'penalty': ['l1', 'l2'],
+        'solver': ['liblinear']
     },
     'Decision Tree': {
         'max_depth': [None, 5, 10],
@@ -276,8 +276,56 @@ param_grid = {
     }
 }
 
+# =============================================================================
+# param_grid = {
+#     'Logistic Regression': {
+#         'C': [0.01, 0.1, 1, 10, 100],
+#         'penalty': ['l1', 'l2'],
+#         'solver': ['liblinear']
+#     },
+#     'Decision Tree': {
+#         'max_depth': [None, 5, 10, 20],
+#         'min_samples_split': [2, 5, 10, 20]
+#     },
+#     'Random Forest': {
+#         'n_estimators': [50, 100, 200, 300],
+#         'max_depth': [None, 10, 20, 30],
+#         'min_samples_split': [2, 5, 10]
+#     },
+#     'SVM': {
+#         'C': [0.01, 0.1, 1, 10, 100],
+#         'kernel': ['linear', 'rbf', 'poly']
+#     },
+#     'Gradient Boosting': {
+#         'n_estimators': [50, 100, 200, 300],
+#         'learning_rate': [0.001, 0.01, 0.1, 1],
+#         'max_depth': [3, 5, 7, 9]
+#     },
+#     'Neural Network': {
+#         'hidden_layer_sizes': [(50,), (100,), (50, 50), (100, 100)],
+#         'alpha': [0.0001, 0.001, 0.01, 0.1]
+#     },
+#     'Voting Classifier': {},
+#     'Bagging Classifier': {
+#         'n_estimators': [10, 50, 100, 200],
+#         'max_samples': [0.5, 0.7, 1.0]
+#     },
+#     'XGBoost Classifier': {
+#         'n_estimators': [50, 100, 200, 300],
+#         'learning_rate': [0.001, 0.01, 0.1, 1],
+#         'max_depth': [3, 5, 7, 9]
+#     },
+#     'LightGBM': {
+#         'n_estimators': [50, 100, 200, 300],
+#         'learning_rate': [0.001, 0.01, 0.1, 1],
+#         'max_depth': [3, 5, 7, 9]
+#     }
+# }
+# =============================================================================
+
+
 #%%
-def train_and_evaluate_models(X_train, X_test, y_train, y_test, models, seed):
+def easy_model(X_train, X_test, y_train, y_test, models, seed):
     results = []
 
     for model_name, model in models.items():
@@ -299,7 +347,7 @@ def train_and_evaluate_models(X_train, X_test, y_train, y_test, models, seed):
     df_results = pd.DataFrame(results, columns=['Model', 'Accuracy', 'Precision', 'Recall', 'F1-score', 'Mean CV Score'])
     return df_results
 
-df_model_results = train_and_evaluate_models(x_train, x_test, y_train, y_test, models, random_state)
+df_model_results = easy_model(x_train, x_test, y_train, y_test, models, random_state)
 
 print(df_model_results)
 
@@ -308,7 +356,7 @@ print(df_model_results)
 
 #%%
 
-def train_and_evaluate_models_with_gridsearch(X_train, X_test, y_train, y_test, models, param_grid, seed):
+def model_CVscore_maximum(X_train, X_test, y_train, y_test, models, param_grid, seed):
     results = []
 
     for model_name, model in models.items():
@@ -341,87 +389,66 @@ def train_and_evaluate_models_with_gridsearch(X_train, X_test, y_train, y_test, 
     return df_results
 
 # 使用示例
-df_model_results = train_and_evaluate_models_with_gridsearch(x_train, x_test, y_train, y_test, models, param_grid, random_state)
-print(df_model_results)
-
-
+df_model_results = model_CVscore_maximum(x_train, x_test, y_train, y_test, models, param_grid, random_state)
 #%%
 
+from itertools import product
 
-
-param_gridd = {
-    'Logistic Regression': {
-        'clf__C': [0.01, 0.1, 1, 10, 100],
-        'clf__penalty': ['l1', 'l2']
-    },
-    'Decision Tree': {
-        'clf__max_depth': [None, 5, 10, 20],
-        'clf__min_samples_split': [2, 5, 10, 20]
-    },
-    'Random Forest': {
-        'clf__n_estimators': [50, 100, 200, 300],
-        'clf__max_depth': [None, 10, 20, 30],
-        'clf__min_samples_split': [2, 5, 10]
-    },
-    'SVM': {
-        'clf__C': [0.01, 0.1, 1, 10, 100],
-        'clf__kernel': ['linear', 'rbf', 'poly']
-    },
-    'Gradient Boosting': {
-        'clf__n_estimators': [50, 100, 200, 300],
-        'clf__learning_rate': [0.001, 0.01, 0.1, 1],
-        'clf__max_depth': [3, 5, 7, 9]
-    },
-    'Neural Network': {
-        'clf__hidden_layer_sizes': [(50,), (100,), (50, 50), (100, 100)],
-        'clf__alpha': [0.0001, 0.001, 0.01, 0.1]
-    },
-    'Voting Classifier': {},
-    'Bagging Classifier': {
-        'clf__n_estimators': [10, 50, 100, 200],
-        'clf__max_samples': [0.5, 0.7, 1.0]
-    },
-    'AdaBoost Classifier': {
-        'clf__n_estimators': [50, 100, 200, 300],
-        'clf__learning_rate': [0.001, 0.01, 0.1, 1]
-    },
-    'XGBoost Classifier': {
-        'clf__n_estimators': [50, 100, 200, 300],
-        'clf__learning_rate': [0.001, 0.01, 0.1, 1],
-        'clf__max_depth': [3, 5, 7, 9]
-    },
-    'LightGBM': {
-        'clf__n_estimators': [50, 100, 200, 300],
-        'clf__learning_rate': [0.001, 0.01, 0.1, 1],
-        'clf__max_depth': [3, 5, 7, 9]
-    },
-
-}
-
-def tune_hyperparameters(X_train, X_test, y_train, y_test, models, param_grid, seed):
+def model_accuracy_maximum(X_train, X_test, y_train, y_test, models, param_grid, seed):
     results = []
-
+    best_model_overall = None
+    best_accuracy_overall = 0
+    
     for model_name, model in models.items():
-        pipe = Pipeline([
-            ('scaler', StandardScaler()),
-            ('clf', model)  
-        ])
-        if hasattr(model, 'random_state'):
-            model.set_params(random_state=seed) 
-        grid_search = GridSearchCV(pipe, param_grid[model_name], cv=10, scoring='accuracy')
-        grid_search.fit(X_train, y_train)
-
-        best_params = grid_search.best_params_
-        best_score = grid_search.best_score_
-
-        best_model = grid_search.best_estimator_
+        print(f"Training {model_name}...")
+        
+        if model_name in param_grid:
+            param_combinations = [dict(zip(param_grid[model_name].keys(), v)) for v in product(*param_grid[model_name].values())]
+            best_model = None
+            best_accuracy = 0
+            best_params = None
+            
+            for params in param_combinations:
+                model.set_params(**params)
+                if hasattr(model, 'random_state'):
+                    model.set_params(random_state=seed)
+                model.fit(X_train, y_train)
+                y_pred = model.predict(X_test)
+                accuracy = accuracy_score(y_test, y_pred)
+                
+                if accuracy > best_accuracy:
+                    best_model = model
+                    best_accuracy = accuracy
+                    best_params = params
+            
+            if best_accuracy > best_accuracy_overall:
+                best_model_overall = best_model
+                best_accuracy_overall = best_accuracy
+        else:
+            if hasattr(model, 'random_state'):
+                model.set_params(random_state=seed)
+            model.fit(X_train, y_train)
+            y_pred = model.predict(X_test)
+            accuracy = accuracy_score(y_test, y_pred)
+            
+            if accuracy > best_accuracy_overall:
+                best_model_overall = model
+                best_accuracy_overall = accuracy
+                best_params = {}
+                
+                
         y_pred = best_model.predict(X_test)
-        test_accuracy = accuracy_score(y_test, y_pred)
+        precision = precision_score(y_test, y_pred)
+        recall = recall_score(y_test, y_pred)
+        f1 = f1_score(y_test, y_pred)
+        
+        results.append([model_name, best_accuracy, precision, recall, f1, best_params])
+    
+    df_results = pd.DataFrame(results, columns=['Model', 'Accuracy', 'Precision', 'Recall', 'F1-score', 'Best Parameters'])
+    
 
-        results.append([model_name, best_params, best_score, test_accuracy])
-
-    df_results = pd.DataFrame(results, columns=['Model', 'Best Parameters', 'Best Score', 'Test Accuracy'])
+    
     return df_results
 
-df_tuninggg_results = tune_hyperparameters(x_train, x_test, y_train, y_test, models, param_gridd, random_state)
-
+# 使用示例
+df_model_results = model_accuracy_maximum(x_train, x_test, y_train, y_test, models, param_grid, random_state)
